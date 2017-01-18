@@ -33,7 +33,6 @@ class TestTickLine(Tickline):
 
 
 class TestRangeDisplayTick(Tick):
-
     data_ranges = ListProperty([])
     #tick_size = ListProperty([])
 
@@ -64,6 +63,8 @@ class TestRangeDisplayTick(Tick):
         width = float(t_end - t_start)
         print("T-start: ", t_start, "T_end: ", t_end, "Width: ", width)
         height = sp(20)
+
+        # Todo: Need to add the logic for halign and valign
 
         self._vertices.extend([x, y, 0, 0,
                                x + width, y, 0, 0,
