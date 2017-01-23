@@ -29,7 +29,6 @@ class TestTickLine(Tickline):
 
     def redraw_(self, *args):
         super().redraw_(*args)
-        print(self.index_0, self.index_1, self.scale)
 
 
 class TestRangeDisplayTick(Tick):
@@ -44,9 +43,12 @@ class TestRangeDisplayTick(Tick):
         instr.add(self._mesh)
         super(Tick, self).__init__(*args, **kw)
 
-        self.data_ranges_idx = list()
+        self.data_ranges_idx_start = list()
+        self.data_ranges_idx_end = list()
+
         for item in self.data_ranges:
-            self.data_ranges_idx.append(item[0])
+            self.data_ranges_idx_start.append(item[0])
+            self.data_ranges_idx_end.append(item[1])
 
     def display(self, tickline):
         super().display(tickline)
@@ -61,7 +63,6 @@ class TestRangeDisplayTick(Tick):
         t_end = tickline.index2pos(self.globalize(tick_data[1]))
 
         width = float(t_end - t_start)
-        print("T-start: ", t_start, "T_end: ", t_end, "Width: ", width)
         height = sp(20)
 
         # Todo: Need to add the logic for halign and valign
@@ -85,16 +86,26 @@ class TestRangeDisplayTick(Tick):
             raise StopIteration
 
         try:
-            data_index = bisect_left(self.data_ranges_idx, index_1 if tl.backward
-            else index_0)
+            r_start = bisect_left(self.data_ranges_idx_start, index_1 if tl.backward else index_0)
+            r_end = bisect_left(self.data_ranges_idx_end, index_1 if tl.backward else index_0)
+
+            if r_start == r_end:
+                data_index = r_start
+            else:
+                data_index = r_end
+
             tick_index = self.data_ranges[data_index][0]  # Pull only the first element of the range for starting x
+            tick_index_end = self.data_ranges[data_index][1]  # Pull only the first element of the range for starting x
+
             condition = self._index_condition(tl, True)
-            while condition(tick_index):
+
+            while condition(tick_index) or condition(tick_index_end):
                 yield (tl.index2pos(self.globalize(tick_index)),
                        tick_index, self.data_ranges[data_index])
                 data_index += 1
                 tick_index = self.data_ranges[data_index][0]
         except IndexError:
+
             raise StopIteration
 
 
